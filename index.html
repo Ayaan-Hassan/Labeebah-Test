@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Special Question for Labeeba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Finger+Paint&display=swap');
+
+        body {
+            background-color: #ffe4e6;
+            font-family: 'Comic Neue', cursive;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .funny-font {
+            font-family: 'Finger Paint', cursive;
+        }
+
+        .floating-element {
+            position: absolute;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 6s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        #main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 8px dashed #f43f5e;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: transform 0.2s ease, border-color 0.5s ease;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            height: 150px;
+            position: relative;
+            width: 100%;
+        }
+
+        .btn-target {
+            position: absolute;
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 110px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 0px rgba(0,0,0,0.1);
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        #btnYes { 
+            background-color: #4ade80; 
+            left: 10%; 
+            border-bottom: 4px solid #16a34a; 
+            z-index: 50;
+        }
+        #btnNo { 
+            background-color: #f43f5e; 
+            right: 10%; 
+            border-bottom: 4px solid #be123c; 
+            z-index: 10;
+        }
+
+        .swapped-yes { left: auto !important; right: 10% !important; }
+        .swapped-no { right: auto !important; left: 10% !important; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(244, 63, 94, 0.4);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 2.5rem;
+            text-align: center;
+            max-width: 350px;
+            border: 6px solid #f43f5e;
+        }
+
+        #celebration {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff1f2;
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .shake { animation: shake 0.4s infinite; }
+        @keyframes shake {
+            0% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            100% { transform: translate(2px, 2px); }
+        }
+
+        .locked-no {
+            opacity: 0.2 !important;
+            filter: grayscale(1);
+            pointer-events: none !important;
+            transform: scale(0.6) !important;
+        }
+
+        .teleporting {
+            position: fixed !important;
+            transition: none !important;
+        }
+
+        .bounce { animation: bounce 0.6s infinite alternate; }
+        @keyframes bounce {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f43f5e;
+            z-index: 2500;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div id="hearts-container"></div>
+
+    <div id="main-card" class="p-8 rounded-[2.5rem] text-center z-10 max-w-sm w-full mx-4">
+        <h1 class="text-3xl mb-2 text-pink-600 funny-font">Hey Labeeba!</h1>
+        <p id="top-text" class="text-lg mb-6 text-gray-700">I have a question that you definitely want to answer honestly...</p>
+        
+        <h2 id="question-text" class="text-3xl font-bold mb-8 text-gray-800">Do you love me? 🥺</h2>
+
+        <div class="btn-container" id="btn-area">
+            <button id="btnYes" class="btn-target">YES!</button>
+            <button id="btnNo" class="btn-target">No.</button>
+        </div>
+        
+        <p id="bottom-hint" class="mt-6 text-pink-400 italic font-bold text-sm">Tap the green button, Labeeba!</p>
+    </div>
+
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-4 text-pink-600 funny-font">WAIT!</h2>
+            <p id="modalText" class="text-lg mb-6 text-gray-700">You clicked something else! Try again!</p>
+            <button id="modalBtn" class="bg-pink-500 text-white w-full py-4 rounded-2xl text-lg font-bold shadow-lg">
+                I'm so sorry!
+            </button>
+        </div>
+    </div>
+
+    <!-- Final Ending Screen -->
+    <div id="celebration" class="p-10">
+        <div class="bounce text-9xl mb-8">✨💖✨</div>
+        <h1 class="text-5xl mb-4 funny-font text-pink-600">I GIVE UP!</h1>
+        <h2 class="text-2xl text-gray-800 font-bold">Labeeba, you're too fast!</h2>
+        <p class="mt-4 text-lg text-gray-700">The button couldn't hide from you forever.</p>
+        <p class="mt-2 text-xl font-bold text-pink-500">I guess it's official: You love me! 😍  But I? </p>
+        <div class="mt-8 space-y-2">
+            <p class="text-gray-500 italic">Level: Unknown</p>
+            <p class="text-gray-500 italic">Status: Unknown</p>
+        </div>
+        <button onclick="location.reload()" class="mt-12 text-pink-400 underline">Restart the prank?</button>
+    </div>
+
+    <script>
+        const btnYes = document.getElementById('btnYes');
+        const btnNo = document.getElementById('btnNo');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalText = document.getElementById('modalText');
+        const modalBtn = document.getElementById('modalBtn');
+        const celebration = document.getElementById('celebration');
+        const card = document.getElementById('main-card');
+        const hint = document.getElementById('bottom-hint');
+        const questionText = document.getElementById('question-text');
+
+        let isSwapped = false;
+        let guiltStep = 0;
+        let isLocked = false;
+        let teleportCount = 0;
+
+        const guiltMessages = [
+            { title: "WHOOPS!", text: "Labeeba, you clicked 'No'!.", btn: "What is Happening!" },
+            { title: "NICE TRY!", text: "You're trying to click 'No' again? How curious! Try once more.", btn: "My finger slipped again!" },
+            { title: "NOT TODAY!", text: "Science says it's 100% impossible for Labeeba to click No.", btn: "I accept science" },
+            { title: "SYSTEM ERROR", text: "The 'No' button is malfunctioning. Please use the alternative button provided.", btn: "Fix the button" }
+        ];
+
+        function createDecor() {
+            const el = document.createElement('div');
+            el.innerHTML = ['❤️', '💖', '🍭', '🌸', '✨', '🤡'][Math.floor(Math.random()*6)];
+            el.className = 'floating-element';
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            el.style.animationDuration = (Math.random() * 4 + 2) + 's';
+            document.getElementById('hearts-container').appendChild(el);
+            setTimeout(() => el.remove(), 6000);
+        }
+        setInterval(createDecor, 300);
+
+        function doSwap() {
+            if (isLocked) {
+                handleTeleport();
+                return;
+            }
+            
+            btnYes.style.pointerEvents = 'none';
+            btnNo.style.pointerEvents = 'none';
+            
+            isSwapped = !isSwapped;
+            if (isSwapped) {
+                btnYes.classList.add('swapped-yes');
+                btnNo.classList.add('swapped-no');
+            } else {
+                btnYes.classList.remove('swapped-yes');
+                btnNo.classList.remove('swapped-no');
+            }
+            
+            card.style.transform = `scale(1.05) rotate(${isSwapped ? 5 : -5}deg)`;
+            
+            setTimeout(() => {
+                card.style.transform = `scale(1) rotate(0deg)`;
+                btnYes.style.pointerEvents = 'auto';
+                btnNo.style.pointerEvents = 'auto';
+            }, 100);
+        }
+
+        function handleTeleport() {
+            teleportCount++;
+            if (teleportCount > 10) {
+                triggerFinalEnding();
+                return;
+            }
+            btnYes.classList.add('teleporting');
+            const maxX = window.innerWidth - 120;
+            const maxY = window.innerHeight - 70;
+            btnYes.style.left = Math.random() * maxX + 'px';
+            btnYes.style.top = Math.random() * maxY + 'px';
+        }
+
+        function triggerFinalEnding() {
+            // Confetti effect
+            for(let i=0; i<50; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.className = 'confetti';
+                    c.style.left = Math.random() * 100 + 'vw';
+                    c.style.backgroundColor = ['#f43f5e', '#4ade80', '#fbbf24', '#3b82f6'][Math.floor(Math.random()*4)];
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 3000);
+                }, i * 50);
+            }
+            celebration.style.display = 'flex';
+        }
+
+        document.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            const rect = btnYes.getBoundingClientRect();
+            const buffer = isLocked ? 100 : 80;
+
+            if (touch.clientX >= rect.left - buffer && 
+                touch.clientX <= rect.right + buffer && 
+                touch.clientY >= rect.top - buffer && 
+                touch.clientY <= rect.bottom + buffer) {
+                
+                if (isLocked) {
+                    handleTeleport();
+                } else {
+                    doSwap();
+                }
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, { capture: true, passive: false });
+
+        btnYes.addEventListener('mouseenter', () => {
+            if (isLocked) handleTeleport();
+            else doSwap();
+        });
+
+        btnNo.addEventListener('click', () => {
+            if (isLocked) return;
+            showGuiltModal();
+        });
+
+        btnYes.addEventListener('click', () => {
+            triggerFinalEnding();
+        });
+
+        function showGuiltModal() {
+            if (guiltStep >= guiltMessages.length) {
+                lockdown();
+                return;
+            }
+
+            const content = guiltMessages[guiltStep];
+            modalTitle.innerText = content.title;
+            modalText.innerText = content.text;
+            modalBtn.innerText = content.btn;
+            modalOverlay.style.display = 'flex';
+            card.classList.add('shake');
+            
+            guiltStep++;
+        }
+
+        function lockdown() {
+            isLocked = true;
+            btnNo.classList.add('locked-no');
+            btnYes.classList.remove('swapped-yes');
+            btnNo.classList.remove('swapped-no');
+            
+            card.style.borderColor = "#4ade80";
+            questionText.innerText = "CHASE ME!";
+            hint.innerText = "THE YES BUTTON HAS GONE ROGUE!";
+            hint.classList.add('text-green-600');
+            
+            modalTitle.innerText = "BOSS LEVEL";
+            modalText.innerText = "Labeeba, you've exhausted the 'No' button. Now you must catch the 'Yes' button if you truly don't love me";
+            modalBtn.innerText = "I'm coming for you!";
+            modalOverlay.style.display = 'flex';
+        }
+
+        modalBtn.onclick = () => {
+            modalOverlay.style.display = 'none';
+            card.classList.remove('shake');
+            if (isLocked) {
+                handleTeleport();
+            }
+        };
+
+    </script>
+</body>
+</html>
