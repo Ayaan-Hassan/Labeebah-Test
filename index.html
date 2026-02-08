@@ -177,23 +177,22 @@
     <div id="modalOverlay" class="modal-overlay">
         <div class="modal-content">
             <h2 id="modalTitle" class="text-2xl font-bold mb-4 text-pink-600 funny-font">WAIT!</h2>
-            <p id="modalText" class="text-lg mb-6 text-gray-700">You clicked something else! Try again!</p>
+            <p id="modalText" class="text-lg mb-6 text-gray-700">You almost clicked something else! Try again!</p>
             <button id="modalBtn" class="bg-pink-500 text-white w-full py-4 rounded-2xl text-lg font-bold shadow-lg">
                 I'm so sorry!
             </button>
         </div>
     </div>
 
-    <!-- Final Ending Screen -->
     <div id="celebration" class="p-10">
         <div class="bounce text-9xl mb-8">✨💖✨</div>
         <h1 class="text-5xl mb-4 funny-font text-pink-600">I GIVE UP!</h1>
         <h2 class="text-2xl text-gray-800 font-bold">Labeeba, you're too fast!</h2>
         <p class="mt-4 text-lg text-gray-700">The button couldn't hide from you forever.</p>
-        <p class="mt-2 text-xl font-bold text-pink-500">I guess it's official: You love me! 😍  But I? </p>
+        <p class="mt-2 text-xl font-bold text-pink-500">I guess it's official: You love me! 😍</p>
         <div class="mt-8 space-y-2">
-            <p class="text-gray-500 italic">Level: Unknown</p>
-            <p class="text-gray-500 italic">Status: Unknown</p>
+            <p class="text-gray-500 italic">Level: Love Master</p>
+            <p class="text-gray-500 italic">Status: Stuck with me 4ever</p>
         </div>
         <button onclick="location.reload()" class="mt-12 text-pink-400 underline">Restart the prank?</button>
     </div>
@@ -212,11 +211,12 @@
 
         let isSwapped = false;
         let guiltStep = 0;
+        let swapCount = 0; // TRACK SWAPS TO PREVENT INFINITE LOOP
         let isLocked = false;
         let teleportCount = 0;
 
         const guiltMessages = [
-            { title: "WHOOPS!", text: "Labeeba, you clicked 'No'!.", btn: "What is Happening!" },
+            { title: "WHOOPS!", text: "Labeeba, you almost clicked 'No'. I've moved the buttons to help you out.", btn: "Thanks for helping me!" },
             { title: "NICE TRY!", text: "You're trying to click 'No' again? How curious! Try once more.", btn: "My finger slipped again!" },
             { title: "NOT TODAY!", text: "Science says it's 100% impossible for Labeeba to click No.", btn: "I accept science" },
             { title: "SYSTEM ERROR", text: "The 'No' button is malfunctioning. Please use the alternative button provided.", btn: "Fix the button" }
@@ -240,6 +240,15 @@
                 return;
             }
             
+            swapCount++;
+            
+            // IF SHE KEEPS CHASING THE SWAP, TRIGGER THE GUILT MODAL AUTOMATICALLY
+            if (swapCount > 5) {
+                swapCount = 0;
+                showGuiltModal();
+                return;
+            }
+
             btnYes.style.pointerEvents = 'none';
             btnNo.style.pointerEvents = 'none';
             
@@ -275,7 +284,6 @@
         }
 
         function triggerFinalEnding() {
-            // Confetti effect
             for(let i=0; i<50; i++) {
                 setTimeout(() => {
                     const c = document.createElement('div');
@@ -289,6 +297,7 @@
             celebration.style.display = 'flex';
         }
 
+        // Global touch interceptor - IMPROVED
         document.addEventListener('touchstart', (e) => {
             const touch = e.touches[0];
             const rect = btnYes.getBoundingClientRect();
@@ -351,7 +360,7 @@
             hint.classList.add('text-green-600');
             
             modalTitle.innerText = "BOSS LEVEL";
-            modalText.innerText = "Labeeba, you've exhausted the 'No' button. Now you must catch the 'Yes' button if you truly don't love me.               Looks like the Items are still missing in the bag you mom brought... Time to find it!";
+            modalText.innerText = "Labeeba, you've exhausted the 'No' button. Now you must catch the 'Yes' button if you truly don't love me (spoiler: you can't).";
             modalBtn.innerText = "I'm coming for you!";
             modalOverlay.style.display = 'flex';
         }
